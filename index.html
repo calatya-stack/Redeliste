@@ -177,7 +177,7 @@
 
   <div style="margin-top:1rem;">
     <div style="font-size:13px;color:var(--text-secondary);">Warteliste (<span id="queue-count">0</span>)</div>
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Wechselt zwischen Q und U; wer bisher weniger gesprochen hat, hat Vorrang</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Neue quotierte Personen rücken automatisch vor, unquotierte werden angehängt; wer bisher weniger gesprochen hat, rutscht beim Eintragen vor Gleichrangige</div>
     <div id="queue-list" style="display:flex;flex-wrap:wrap;gap:8px;min-height:20px;"></div>
   </div>
 
@@ -194,7 +194,6 @@
   let queue = [];
   let groups = [];
   let spokenCount = {};
-  let lastSpokenType = null;
   let editMode = false;
   let addPersonQuota = false;
   let groupMemberQuota = false;
@@ -215,7 +214,7 @@
 
   function saveState(){
     try{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({roster, queue, groups, spokenCount, lastSpokenType, nextId, currentScreen}));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({roster, queue, groups, spokenCount, nextId, currentScreen}));
     }catch(e){ console.error('Speichern fehlgeschlagen', e); }
   }
 
@@ -228,61 +227,43 @@
         queue = parsed.queue || [];
         groups = parsed.groups || [];
         spokenCount = parsed.spokenCount || {};
-        lastSpokenType = parsed.lastSpokenType || null;
         nextId = parsed.nextId || 1;
         currentScreen = parsed.currentScreen || 'prep';
       }
     }catch(e){ /* noch kein gespeicherter Stand */ }
   }
 
-  function priorityIndex(arr){
-    let bestIdx = -1, bestCount = Infinity, bestOrig = Infinity;
-    for(let i=0;i<arr.length;i++){
-      const c = spokenCount[arr[i].name] || 0;
-      const orig = queue.indexOf(arr[i]);
-      if(c < bestCount || (c === bestCount && orig < bestOrig)){
-        bestIdx = i; bestCount = c; bestOrig = orig;
-      }
+  function insertIntoQueue(entry){
+    const newCount = spokenCount[entry.name] || 0;
+    let lastQIdx = -1;
+    for(let i = 0; i < queue.length; i++){
+      if(queue[i].quota) lastQIdx = i;
     }
-    return bestIdx;
+    if(entry.quota){
+      const baseIdx = Math.min(lastQIdx + 2, queue.length);
+      let insertIdx = baseIdx;
+      for(let i = 0; i < baseIdx; i++){
+        if(queue[i].quota){
+          const c = spokenCount[queue[i].name] || 0;
+          if(c > newCount){ insertIdx = i; break; }
+        }
+      }
+      queue.splice(insertIdx, 0, entry);
+    } else {
+      const regionStart = lastQIdx + 1;
+      let insertIdx = queue.length;
+      for(let i = regionStart; i < queue.length; i++){
+        if(!queue[i].quota){
+          const c = spokenCount[queue[i].name] || 0;
+          if(c > newCount){ insertIdx = i; break; }
+        }
+      }
+      queue.splice(insertIdx, 0, entry);
+    }
   }
 
   function computeDisplayQueue(){
-    const qArr = queue.filter(function(e){ return e.quota; });
-    const nArr = queue.filter(function(e){ return !e.quota; });
-    const order = [];
-    let last = lastSpokenType;
-
-    while(qArr.length || nArr.length){
-      let pickedType, arr;
-      const desired = last === 'unquotiert' ? 'quotiert' : (last === 'quotiert' ? 'unquotiert' : null);
-      if(desired === 'quotiert' && qArr.length){
-        arr = qArr; pickedType = 'quotiert';
-      } else if(desired === 'unquotiert' && nArr.length){
-        arr = nArr; pickedType = 'unquotiert';
-      } else if(desired === null){
-        const qi = priorityIndex(qArr);
-        const ni = priorityIndex(nArr);
-        if(qi === -1){ arr = nArr; pickedType = 'unquotiert'; }
-        else if(ni === -1){ arr = qArr; pickedType = 'quotiert'; }
-        else {
-          const qCount = spokenCount[qArr[qi].name] || 0;
-          const nCount = spokenCount[nArr[ni].name] || 0;
-          const qOrig = queue.indexOf(qArr[qi]);
-          const nOrig = queue.indexOf(nArr[ni]);
-          if(qCount < nCount || (qCount === nCount && qOrig < nOrig)){ arr = qArr; pickedType = 'quotiert'; }
-          else { arr = nArr; pickedType = 'unquotiert'; }
-        }
-      } else {
-        if(qArr.length){ arr = qArr; pickedType = 'quotiert'; }
-        else { arr = nArr; pickedType = 'unquotiert'; }
-      }
-      const idx = priorityIndex(arr);
-      const picked = arr.splice(idx, 1)[0];
-      order.push(picked);
-      last = pickedType;
-    }
-    return order;
+    return queue;
   }
 
   function showScreen(screen){
@@ -462,7 +443,7 @@
       btn.onclick = function(){
         const name = btn.getAttribute('data-add-name');
         const quotaVal = btn.getAttribute('data-add-quota') === 'true';
-        queue.push({id: nextId++, name: name, quota: quotaVal});
+        insertIntoQueue({id: nextId++, name: name, quota: quotaVal});
         saveState();
         render();
       };
@@ -556,7 +537,6 @@
       const spoken = displayOrder[0];
       queue = queue.filter(function(e){ return e.id !== spoken.id; });
       spokenCount[spoken.name] = (spokenCount[spoken.name] || 0) + 1;
-      lastSpokenType = spoken.quota ? 'quotiert' : 'unquotiert';
       saveState();
       render();
     }
@@ -571,7 +551,6 @@
   document.getElementById('icon-end-session').onclick = function(){
     queue = [];
     spokenCount = {};
-    lastSpokenType = null;
     saveState();
     render();
     showScreen('prep');
