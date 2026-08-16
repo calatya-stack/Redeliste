@@ -1,4 +1,4 @@
-const CACHE_NAME = "redeliste-cache-v1";
+const CACHE_NAME = "redeliste-cache-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -30,8 +30,16 @@ self.addEventListener("activate", function (event) {
 
 self.addEventListener("fetch", function (event) {
   event.respondWith(
-    caches.match(event.request).then(function (cached) {
-      return cached || fetch(event.request);
-    })
+    fetch(event.request)
+      .then(function (response) {
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then(function (cache) {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      })
+      .catch(function () {
+        return caches.match(event.request);
+      })
   );
 });
