@@ -89,7 +89,9 @@
   .roster-btn{position:relative;text-align:left;}
   .roster-btn .del{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--fill-danger);color:var(--on-danger);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;line-height:1;}
   .roster-btn .swap{position:absolute;top:-7px;right:17px;width:20px;height:20px;border-radius:50%;background:var(--fill-secondary);border:0.5px solid var(--border-strong);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;line-height:1;}
-  #roster-grid-select .roster-btn{font-size:17px;padding:13px 14px;}
+  #roster-grid-select .roster-btn{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;font-size:18px;padding:8px;}
+  #roster-grid-select .roster-btn span{font-size:13px;}
+  .sticky-top{position:sticky;top:0;z-index:10;background:var(--surface-0);padding-top:0.75rem;margin-top:-0.75rem;padding-bottom:0.75rem;border-bottom:0.5px solid var(--border);}
   .group-btn{position:relative;text-align:left;}
   .group-btn .del{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--fill-danger);color:var(--on-danger);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;line-height:1;}
   .group-btn .edit{position:absolute;top:-7px;right:17px;width:20px;height:20px;border-radius:50%;background:var(--fill-secondary);border:0.5px solid var(--border-strong);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;line-height:1;}
@@ -179,19 +181,21 @@
 </div>
 
 <div id="screen-redeliste" style="display:none;">
-  <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
-    <button id="icon-reset-queue" class="top-action-btn" aria-label="Redeliste zurücksetzen" title="Redeliste zurücksetzen">Zurücksetzen</button>
-    <button id="icon-end-session" class="top-action-btn" aria-label="Sitzung beenden" title="Sitzung beenden">Beenden</button>
-  </div>
+  <div class="sticky-top">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
+      <button id="icon-reset-queue" class="top-action-btn" aria-label="Redeliste zurücksetzen" title="Redeliste zurücksetzen">Zurücksetzen</button>
+      <button id="icon-end-session" class="top-action-btn" aria-label="Sitzung beenden" title="Sitzung beenden">Beenden</button>
+    </div>
 
-  <div style="background:var(--surface-1);border:0.5px solid var(--border);border-radius:12px;padding:1.25rem 1.25rem;text-align:center;">
-    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;">Nächster Redner</div>
-    <div id="next-name" style="font-size:22px;font-weight:500;min-height:28px;">–</div>
-    <div id="next-tag" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
-    <div id="after-next" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
-    <button id="advance-btn" class="btn-accent" style="margin-top:14px;border:none;padding:10px 20px;">
-      ✓ Hat gesprochen, weiter
-    </button>
+    <div style="background:var(--surface-1);border:0.5px solid var(--border);border-radius:12px;padding:1.25rem 1.25rem;text-align:center;">
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;">Nächste*r Redner*in</div>
+      <div id="next-name" style="font-size:22px;font-weight:500;min-height:28px;">–</div>
+      <div id="next-tag" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+      <div id="after-next" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
+      <button id="advance-btn" class="btn-accent" style="margin-top:14px;border:none;padding:10px 20px;">
+        ✓ Hat gesprochen, weiter
+      </button>
+    </div>
   </div>
 
   <div style="margin-top:1rem;">
@@ -203,7 +207,7 @@
   <div style="border-top:0.5px solid var(--border);margin:1.5rem 0;"></div>
 
   <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Antippen, um zur Redeliste hinzuzufügen</div>
-  <div id="roster-grid-select" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;"></div>
+  <div id="roster-grid-select" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
   <div id="roster-empty-select" style="display:none;font-size:13px;color:var(--text-muted);padding:0.5rem 0;">Noch niemand in der Vorbereitung eingetragen.</div>
 </div>
 
@@ -415,7 +419,7 @@
       const count = spokenCount[p.name] || 0;
       return '<button class="roster-btn" data-prep-name="' + escapeHtml(p.name) + '">' +
         escapeHtml(p.name) + ' <span style="font-size:11px;color:var(--text-muted);">(' + (p.quota ? 'Q' : 'U') + (count > 0 ? ', ' + count + 'x' : '') + ')</span>' +
-        (editMode ? '<span class="del" data-remove-roster="' + escapeHtml(p.name) + '" role="button" tabindex="0" aria-label="' + escapeHtml(p.name) + ' entfernen">×</span>' : '') +
+        '<span class="del" data-remove-roster="' + escapeHtml(p.name) + '" role="button" tabindex="0" aria-label="' + escapeHtml(p.name) + ' entfernen">×</span>' +
         (editMode ? '<span class="swap" data-swap-roster="' + escapeHtml(p.name) + '" role="button" tabindex="0" aria-label="' + escapeHtml(p.name) + ' Quote wechseln">⇄</span>' : '') +
         '</button>';
     }).join('');
