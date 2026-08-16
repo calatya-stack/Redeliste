@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#378ADD" />
+<meta name="theme-color" content="#D2001A" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -11,10 +11,13 @@
 <link rel="manifest" href="./manifest.json" />
 <link rel="icon" href="./icon-192.png" />
 <link rel="apple-touch-icon" href="./icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <title>Quotierte Redeliste</title>
 <style>
   :root{
-    --surface-0:#f5f5f3;
+    --surface-0:#f7f5f3;
     --surface-1:#ffffff;
     --surface-2:#ffffff;
     --text-primary:#1a1a18;
@@ -23,14 +26,17 @@
     --text-danger:#a32d2d;
     --border:rgba(0,0,0,0.10);
     --border-strong:rgba(0,0,0,0.20);
-    --fill-accent:#378ADD;
+    --brand-red:#FF0000;
+    --fill-accent:#D2001A;
+    --fill-accent-hover:#B00016;
     --on-accent:#ffffff;
+    --contrast-red:#6F003C;
     --fill-danger:#E24B4A;
     --on-danger:#ffffff;
     --fill-secondary:rgba(0,0,0,0.04);
     --fill-success:#3b8f2a;
-    --fill-pro:#7F77DD;
-    --radius:8px;
+    --fill-pro:#6F003C;
+    --radius:6px;
   }
   @media (prefers-color-scheme: dark){
     :root{
@@ -44,21 +50,26 @@
       --border:rgba(255,255,255,0.12);
       --border-strong:rgba(255,255,255,0.24);
       --fill-secondary:rgba(255,255,255,0.08);
+      --fill-accent:#E2001F;
+      --fill-accent-hover:#FF2A3D;
     }
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--surface-0);}
   body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--text-primary);
-    padding:1.25rem 1rem 3rem;
+    padding:0 1rem 3rem;
     max-width:560px;
     margin:0 auto;
     line-height:1.5;
   }
-  h1{font-size:19px;font-weight:500;margin:0 0 1.25rem;text-align:center;}
+  .masthead{height:6px;background:var(--brand-red);margin:0 -1rem 1.25rem;}
+  .brand-header{display:flex;align-items:center;justify-content:center;gap:10px;margin:1rem 0 1.25rem;}
+  .brand-wedge{width:14px;height:22px;background:var(--brand-red);clip-path:polygon(0 0,100% 0,60% 100%,0 100%);flex-shrink:0;}
+  h1{font-size:19px;font-weight:700;margin:0;text-align:center;letter-spacing:-0.01em;}
   button{
-    font-family:inherit;font-size:14px;color:var(--text-primary);
+    font-family:inherit;font-size:14px;font-weight:500;color:var(--text-primary);
     background:transparent;border:0.5px solid var(--border-strong);
     border-radius:var(--radius);padding:8px 14px;cursor:pointer;
   }
@@ -82,15 +93,23 @@
   .group-btn{position:relative;text-align:left;}
   .group-btn .del{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--fill-danger);color:var(--on-danger);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;line-height:1;}
   .group-btn .edit{position:absolute;top:-7px;right:17px;width:20px;height:20px;border-radius:50%;background:var(--fill-secondary);border:0.5px solid var(--border-strong);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;line-height:1;}
-  .tab-btn{flex:1;font-size:14px;padding:8px;}
+  .tab-btn{flex:1;font-size:14px;font-weight:500;padding:8px;}
   .tab-btn.active{background:var(--fill-accent);color:var(--on-accent);border-color:transparent;}
   .section-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;}
   .top-action-btn{font-size:13px;padding:6px 12px;}
+  .btn-accent{background:var(--fill-accent);color:var(--on-accent);border-color:transparent;}
+  .btn-accent:hover{background:var(--fill-accent-hover);}
+  .app-footer{margin-top:2.5rem;padding-top:1.25rem;border-top:0.5px solid var(--border);font-size:12px;color:var(--text-muted);text-align:center;}
+  .app-footer a{color:var(--fill-accent);}
 </style>
 </head>
 <body>
 
-<h1>Quotierte Redeliste</h1>
+<div class="masthead"></div>
+<div class="brand-header">
+  <div class="brand-wedge" aria-hidden="true"></div>
+  <h1>Quotierte Redeliste</h1>
+</div>
 <h2 class="sr-only">Redeliste mit doppelter Quotierung: Vorbereitung zum Anlegen der Teilnehmer*innenliste und Gruppen, Redeliste mit aktiver Warteliste und Schnellwahl</h2>
 
 <div style="display:flex;gap:8px;margin-bottom:1.5rem;">
@@ -136,12 +155,12 @@
 
     <div id="group-error" style="font-size:13px;color:var(--text-danger);margin-top:4px;display:none;"></div>
     <div style="display:flex;gap:8px;margin-top:10px;">
-      <button id="group-save-btn" style="flex:1;background:var(--fill-accent);color:var(--on-accent);border:none;">Gruppe speichern</button>
+      <button id="group-save-btn" class="btn-accent" style="flex:1;border:none;">Gruppe speichern</button>
       <button id="group-cancel-btn" style="flex:1;">Abbrechen</button>
     </div>
   </div>
 
-  <div style="font-size:13px;color:var(--text-secondary);margin:1.5rem 0 6px;"><span class="section-dot" style="background:var(--fill-success);"></span>Teilnehmer*innen</div>
+  <div style="font-size:13px;color:var(--text-secondary);margin:1.5rem 0 6px;"><span class="section-dot" style="background:var(--text-muted);"></span>Teilnehmer*innen</div>
   <div id="roster-grid-prep" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;"></div>
   <div id="roster-empty-prep" style="display:none;font-size:13px;color:var(--text-muted);padding:0.5rem 0;">Noch niemand eingetragen.</div>
 
@@ -170,7 +189,7 @@
     <div id="next-name" style="font-size:22px;font-weight:500;min-height:28px;">–</div>
     <div id="next-tag" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
     <div id="after-next" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
-    <button id="advance-btn" style="margin-top:14px;background:var(--fill-accent);color:var(--on-accent);border:none;padding:10px 20px;">
+    <button id="advance-btn" class="btn-accent" style="margin-top:14px;border:none;padding:10px 20px;">
       ✓ Hat gesprochen, weiter
     </button>
   </div>
@@ -186,6 +205,10 @@
   <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Antippen, um zur Redeliste hinzuzufügen</div>
   <div id="roster-grid-select" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;"></div>
   <div id="roster-empty-select" style="display:none;font-size:13px;color:var(--text-muted);padding:0.5rem 0;">Noch niemand in der Vorbereitung eingetragen.</div>
+</div>
+
+<div class="app-footer">
+  Fragen oder Probleme? <a href="mailto:larissa.bauland@die-linke-steinfurt.de">larissa.bauland@die-linke-steinfurt.de</a>
 </div>
 
 <script>
